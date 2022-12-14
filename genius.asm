@@ -19,12 +19,12 @@
 ; 3840 branco						1111 0000
 
 
-; posições dos blocos (inicio)
-; tamanho = 5x4
-posiCima: var #178
-posiBaixo: var #858
-posiEsq: var #372
-posiDir: var #384
+; posições dos blocos (centro)
+; tamanho = 8x6
+posiCima: var #294
+posiBaixo: var #934
+posiEsq: var #608
+posiDir: var #630
 
 ; cores dos blocos
 corCima: 0010 0000 ; verde
@@ -43,4 +43,5 @@ main:
 
 
 
-desenharSeta:
+desenharBloco:
+    
