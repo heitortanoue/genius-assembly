@@ -1,27 +1,10 @@
-; ------- TABELA DE CORES -------
-; adicione ao caracter para Selecionar a cor correspondente
-
-; 0 branco							0000 0000
-; 256 marrom						0001 0000
-; 512 verde							0010 0000
-; 768 oliva							0011 0000
-; 1024 azul marinho					0100 0000
-; 1280 roxo							0101 0000
-; 1536 teal							0110 0000
-; 1792 prata						0111 0000
-; 2048 cinza						1000 0000
-; 2304 vermelho						1001 0000
-; 2560 lima							1010 0000
-; 2816 amarelo						1011 0000
-; 3072 azul							1100 0000
-; 3328 rosa							1101 0000
-; 3584 aqua							1110 0000
-; 3840 branco						1111 0000
 
 jmp main
 
+; Palavras/frases utilizadas
 nomeJogo : string "GENIUS"
 mensagemInicio : string "[enter para iniciar o jogo]"
+Letra : var #0
 
 ; posições dos blocos (centro)
 ; tamanho = 8x6
@@ -31,10 +14,10 @@ posiEsq: var #608
 posiDir: var #630
 
 ; cores dos blocos
-; corCima: 0010 0000 ; verde
-; corBaixo: 0100 0000 ; azul
-; corEsq: 1011 0000 ; amarelo
-; corDir: 1001 0000 ; vermelho
+corCima: var #512; verde
+corBaixo: var #3072 ; azul
+corEsq: var #2816 ; amarelo
+corDir: var #2304 ; vermelho
 
 ; string desenhos
 bloco: var #125 ; caracter usado para printar o bloco
@@ -58,6 +41,43 @@ main:   ; gera pagina inicial
 	
 	call Imprimestr
 
+	call esperaInicio
+
+	halt
+
+digLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
+	push fr		; Protege o registrador de flags
+	push r0
+	push r1
+	loadn r1, #255	; Se nao digitar nada vem 255
+
+   	digLetra_Loop:
+		inchar r0			; Le o teclado, se nada for digitado = 255
+		cmp r0, r1			;compara r0 com 255
+		jeq digLetra_Loop	; Fica lendo ate' que digite uma tecla valida
+
+	store Letra, r0			; Salva a tecla na variavel global "Letra"			
+	
+	pop r1
+	pop r0
+	pop fr
+	rts
+
+esperaInicio:
+	push r0
+	push r1
+	loadn r1, #13
+	esperaInicioLoop:
+		call digLetra
+		load r0, Letra
+		cmp r0, r1
+		jne esperaInicioLoop
+	pop r1
+	pop r0
+	rts
+
+
+geraPaginaJogo:
 	halt
 
 DesenharEstrelas:
