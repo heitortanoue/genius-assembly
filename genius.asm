@@ -18,6 +18,10 @@
 ; 3584 aqua							1110 0000
 ; 3840 branco						1111 0000
 
+jmp main
+
+nomeJogo : string "GENIUS"
+mensagemInicio : string "[enter para iniciar o jogo]"
 
 ; posições dos blocos (centro)
 ; tamanho = 8x6
@@ -27,15 +31,13 @@ posiEsq: var #608
 posiDir: var #630
 
 ; cores dos blocos
-corCima: 0010 0000 ; verde
-corBaixo: 0100 0000 ; azul
-corEsq: 1011 0000 ; amarelo
-corDir: 1001 0000 ; vermelho
+; corCima: 0010 0000 ; verde
+; corBaixo: 0100 0000 ; azul
+; corEsq: 1011 0000 ; amarelo
+; corDir: 1001 0000 ; vermelho
 
 ; string desenhos
-bloco: #125 ; caracter usado para printar o bloco
-
-jmp main
+bloco: var #125 ; caracter usado para printar o bloco
 
 ; da pra dividir em tres grupos
 ; um -> piscarSequencia e verificaExec
@@ -43,22 +45,71 @@ jmp main
 ; tres -> geraPaginaJogo
 
 main:   ; gera pagina inicial
+	call DesenharEstrelas;
+	loadn r0, #296			; Posicao na tela onde a mensagem sera' escrita
+	loadn r1, #nomeJogo	; Carrega r1 com o endereco do vetor que contem a mensagem
+	loadn r2, #0			; Seleciona a COR da Mensagem
+	
+	call Imprimestr
 
+	loadn r0, #807			; Posicao na tela onde a mensagem sera' escrita
+	loadn r1, #mensagemInicio	; Carrega r1 com o endereco do vetor que contem a mensagem
+	loadn r2, #0			; Seleciona a COR da Mensagem
+	
+	call Imprimestr
 
-verificaExec:   ; verifica se a execucao da sequencia foi feita correntamente e aumenta a pontuacao
+	halt
 
-piscarSequencia:    ; "pisca" os retangulos de acordo com a sequencia
+DesenharEstrelas:
+	loadn r0, #70
+	loadn r1, #810
+	outchar r1, r0
 
-geradordeAleatorio: ;gera um numero entre 0 e 3 para saber qual irá piscar
-                    ; empilha a valor na sequencia
+	loadn r0, #126
+	loadn r1, #1578
+	outchar r1, r0
 
-geraPaginaJogo  ; usa a funcao desenharBloco para criar a pagina
+	loadn r0, #456
+	loadn r1, #2858
+	outchar r1, r0
 
-desenharBloco:  ; desenho do bloco com centro em x
-                ; r0 posicao de inicio (x - 124)
-                ; r1 = 8 (tamanho da linha)
-                ; r2 cor do bloco
-                ; usar Imprimestr para implentar isso
+	loadn r0, #924
+	loadn r1, #2858
+	outchar r1, r0
+
+	loadn r0, #515
+	loadn r1, #810
+	outchar r1, r0
+
+	loadn r0, #723
+	loadn r1, #1578
+	outchar r1, r0
+
+	loadn r0, #664
+	loadn r1, #3626
+	outchar r1, r0
+
+	loadn r0, #1032
+	loadn r1, #1322
+	outchar r1, r0
+
+	loadn r0, #232
+	loadn r1, #3370
+	outchar r1, r0
+
+	loadn r0, #282
+	loadn r1, #1322
+	outchar r1, r0
+
+	loadn r0, #1055
+	loadn r1, #2858
+	outchar r1, r0
+
+	loadn r0, #1185
+	loadn r1, #3370
+	outchar r1, r0
+	rts
+
 
 Imprimestr:		;  Rotina de Impresao de Mensagens:    
 				; r0 = Posicao da tela que o primeiro caractere da mensagem sera' impresso
