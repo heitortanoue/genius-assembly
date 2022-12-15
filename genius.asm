@@ -8,12 +8,68 @@ apagaMensagem : string "                           "
 Letra : var #0
 pontos : string " Pontos: "
 
+incRand: var #1;circular a tabela de nr. Randomicos
+randSequence : var #35; tabela de nr. Randomicos
+   static randSequence + #0 , #56241    ; %4 = 1
+   static randSequence + #1 , #53281    ; %4 = 2
+   static randSequence + #2 , #1409     ; %4 = 3
+   static randSequence + #3 , #30428    ; %4 = 0
+   static randSequence + #4 , #51627    ; %4 = 3
+   static randSequence + #7 , #10476    ; %4 = 0
+   static randSequence + #8 , #42149    ; %4 = 1
+   static randSequence + #9 , #15652    ; %4 = 2
+   static randSequence + #10, #40367    ; %4 = 3
+   static randSequence + #11, #1221     ; %4 = 1
+   static randSequence + #12, #33317    ; %4 = 2
+   static randSequence + #13, #49878    ; %4 = 0
+   static randSequence + #14, #57321    ; %4 = 1
+   static randSequence + #15, #13091    ; %4 = 2
+   static randSequence + #16, #12214    ; %4 = 3
+   static randSequence + #17, #7925     ; %4 = 1
+   static randSequence + #18, #15409    ; %4 = 2
+   static randSequence + #19, #51788    ; %4 = 0
+   static randSequence + #20, #29654    ; %4 = 2
+   static randSequence + #21, #23848    ; %4 = 0
+   static randSequence + #22, #43871    ; %4 = 3
+   static randSequence + #23, #56169    ; %4 = 1
+   static randSequence + #24, #33517    ; %4 = 3
+   static randSequence + #25, #39218    ; %4 = 2
+   static randSequence + #26, #39371    ; %4 = 3
+   static randSequence + #27, #61204    ; %4 = 0
+   static randSequence + #28, #47533    ; %4 = 1
+   static randSequence + #29, #18006    ; %4 = 2
+   static randSequence + #30, #18996    ; %4 = 2
+   static randSequence + #31, #18456    ; %4 = 3
+   static randSequence + #32, #19456    ; %4 = 0
+   static randSequence + #33, #21456    ; %4 = 1
+   static randSequence + #34, #0        ; %4 = 0
+; %4: 0 = verde, 1 = vermelho, 2 = amarelo, 3 = azul
+; cima: verde, direita: vermelho, esquerda: amarelo, baixo: azul
+; probabilidades:
+; 0: 0.25 (8)
+; 1: 0.25 (8)
+; 2: 0.25 (8)
+; 3: 0.25 (8)
+; fim da tabela de nr. Randomicos
+
+jogadasAtual : var #0 ; indice da ultima jogada no vetor jogadas
+ultimaJogada : var #0 ; converte Letra para numero
+jogadas : var #32
+
 ; da pra dividir em tres grupos
 ; um -> piscarSequencia e verificaExec
+;   piscarSequencia -> pisca as cores de acordo com a sequencia (jogadas)
+;   verificaExec -> verifica se a sequencia digitada pelo usuario esta correta
 ; dois-> geradordeAleatorio e escreve main
 ; tres -> geraPaginaJogo
 
 main:   ; gera pagina inicial
+
+    ; NAO REMOVER
+    loadn r0, #0
+    store jogadasAtual, r0
+    ; NAO REMOVER
+
 	call DesenharEstrelas;
 	loadn r0, #296			; Posicao na tela onde a mensagem sera' escrita
 	loadn r1, #nomeJogo	; Carrega r1 com o endereco do vetor que contem a mensagem
@@ -30,6 +86,20 @@ main:   ; gera pagina inicial
 	call esperaInicio
 
 	call geraPaginaJogo
+	
+    ; gera a primeira jogada
+    call insereJogadaAleatoria
+
+    ; MODELO DE USO de acessaJogada
+    ; acessa primeira jogada
+    loadn r0, #1
+    ; para acessar a ultima jogada, use o valor de jogadasAtual
+    ; load r0, jogadasAtual
+    call acessaJogada
+    ; r0 contem o valor da jogada
+
+    call digLetra
+
 
 	halt
 
@@ -154,6 +224,74 @@ desenhaLinha:
 	pop r1
 	pop r0
 	rts
+
+geraAleatorio: ; gera num aleatorio de 0 a 3 (para o proximo valor do genius)
+   push r1
+
+   load r0, incRand
+   inc r0
+   loadn r1, #35
+   mod r0, r0, r1
+   store incRand, r0
+   loadn r1, #randSequence
+   add r1, r1, r0
+   loadi r0, r1
+
+   pop r1
+   rts
+
+
+;(r0 - 1) é o valor maximo que pode ser gerado
+geraAleatorioComMax:
+   push r1
+
+   mov r1, r0
+   call geraAleatorio
+   mod r0, r0, r1
+
+   pop r1
+   rts
+
+; r0 = posicao a ser acessada
+acessaJogada:
+    push r1
+
+    mov r1, r0
+    ; r0 esta livre
+    ; r1 = posicao a ser acessada
+    loadn r0, #jogadas
+    add r1, r1, r0
+    ; r1 agora aponta para a posicao da jogada
+    loadi r0, r1
+
+    pop r1
+    rts
+
+
+insereJogadaAleatoria:
+    push r0
+    push r1
+
+    ; incrementa o contador de jogadas
+    load r0, jogadasAtual
+    inc r0
+    store jogadasAtual, r0
+    ; coloca em r1 a posicao a ser acessada
+    loadn r1, #jogadas
+    add r1, r1, r0
+
+    ; r0 = num max - 1
+    loadn r0, #4
+    call geraAleatorioComMax
+
+    ; r0 = valor aleatorio
+    ; r1 = posicao a ser acessada
+    storei r1, r0
+
+    pop r1
+    pop r0
+    rts
+
 
 DesenharEstrelas:
 	loadn r0, #70
