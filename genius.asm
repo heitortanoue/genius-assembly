@@ -86,22 +86,18 @@ geraPaginaJogo:
 	loadn r1, #1584
 	outchar r1, r0
 
-	loadn r0, #125 ; tipo de caracter usado para desenhar o bloco
 	loadn r1, #512 ; cor do bloco de cima
 	loadn r2, #216 ; posicao do bloco de cima
 	call desenhaBloco
 
-	loadn r0, #125 ; tipo de caracter usado para desenhar o bloco
 	loadn r1, #2816 ; cor do bloco de esq
 	loadn r2, #525 ; posicao do bloco de esq
 	call desenhaBloco
 
-	loadn r0, #125 ; tipo de caracter usado para desenhar o bloco
 	loadn r1, #2304 ; cor do bloco de dir
 	loadn r2, #547 ; posicao do bloco de dir
 	call desenhaBloco
-
-	loadn r0, #125 ; tipo de caracter usado para desenhar o bloco
+	
 	loadn r1, #3072 ; cor do bloco de baixo
 	loadn r2, #856 ; posicao do bloco de baixo
 	call desenhaBloco
@@ -111,6 +107,7 @@ geraPaginaJogo:
 	pop r0
 	rts
 
+; definir r1 como cor do bloco e r2 a posicao de INICIO
 desenhaBloco:
 	push r0
 	push r1
@@ -119,6 +116,7 @@ desenhaBloco:
 	push r4
 	push r5
 
+	loadn r0, #125 ; tipo de caracter usado para desenhar o bloco
 	loadn r4, #40
 	loadn r5, #240 ; criterio de parada das linhas
 	add r5, r5, r2 ; adicionando a posicao inicial, assim temos a posicao final do bloco
@@ -138,7 +136,6 @@ desenhaBloco:
 	pop r1
 	pop r0
 	rts
-
 
 desenhaLinha:
 	push r0 ; caracter
