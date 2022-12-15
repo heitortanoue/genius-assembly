@@ -1,6 +1,3 @@
-
-jmp main
-
 ; Palavras/frases utilizadas
 nomeJogo : string "GENIUS"
 mensagemInicio : string "[enter para iniciar o jogo]"
@@ -8,19 +5,19 @@ Letra : var #0
 
 ; posições dos blocos (centro)
 ; tamanho = 8x6
-posiCima: var #294
-posiBaixo: var #934
-posiEsq: var #608
-posiDir: var #630
+posiCima : var #211
+posiBaixo : var #851
+posiEsq : var #525
+posiDir : var #547
 
 ; cores dos blocos
-corCima: var #512; verde
-corBaixo: var #3072 ; azul
-corEsq: var #2816 ; amarelo
-corDir: var #2304 ; vermelho
+corCima : var #512; verde
+corBaixo : var #3072 ; azul
+corEsq : var #2816 ; amarelo
+corDir : var #2304 ; vermelho
 
 ; string desenhos
-bloco: var #125 ; caracter usado para printar o bloco
+bloco : var #125 ; caracter usado para printar o bloco
 
 ; da pra dividir em tres grupos
 ; um -> piscarSequencia e verificaExec
@@ -42,6 +39,8 @@ main:   ; gera pagina inicial
 	call Imprimestr
 
 	call esperaInicio
+
+	call geraPaginaJogo
 
 	halt
 
@@ -78,7 +77,81 @@ esperaInicio:
 
 
 geraPaginaJogo:
-	halt
+	push r0
+	push r1
+	push r2
+
+	load r0, bloco ; tipo de caracter usado para desenhar o bloco
+	load r1, corCima ; cor do bloco de cima
+	load r2, posiCima ; posicao do bloco de cima
+	call desenhaBloco
+
+	load r0, bloco ; tipo de caracter usado para desenhar o bloco
+	load r1, corEsq ; cor do bloco de cima
+	load r2, posiEsq ; posicao do bloco de cima
+	call desenhaBloco
+
+	load r0, bloco ; tipo de caracter usado para desenhar o bloco
+	load r1, corDir ; cor do bloco de cima
+	load r2, posiDir ; posicao do bloco de cima
+	call desenhaBloco
+
+	load r0, bloco ; tipo de caracter usado para desenhar o bloco
+	load r1, corBaixo ; cor do bloco de cima
+	load r2, posiBaixo ; posicao do bloco de cima
+	call desenhaBloco
+
+	pop r2
+	pop r1
+	pop r0
+	rts
+
+desenhaBloco:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+
+	loadn r4, #40
+	loadn r5, #240 ; criterio de parada das linhas
+	add r5, r5, r2 ; adicionando a posicao inicial, assim temos a posicao final do bloco
+
+	desenhaColunaLoop:
+		loadn r3, #8
+		add r3, r3, r2 ; final da linha
+		call desenhaLinha
+		add r2, r2, r4
+		cmp r2, r5
+		jle desenhaColunaLoop
+
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	rts
+
+
+desenhaLinha:
+	push r0 ; caracter
+	push r1 ; cor
+	push r2 ; posicao
+
+	add r0, r0, r1 ; adiciona cor ao caracter
+
+	desenhaLoop:
+		outchar r0, r2 ; printa ele
+		inc r2
+		cmp r2, r3
+		jle desenhaLoop
+	
+	pop r2
+	pop r1
+	pop r0
+	rts
 
 DesenharEstrelas:
 	loadn r0, #70
