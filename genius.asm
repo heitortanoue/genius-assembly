@@ -1,23 +1,12 @@
+
+jmp main
+
 ; Palavras/frases utilizadas
 nomeJogo : string "GENIUS"
 mensagemInicio : string "[enter para iniciar o jogo]"
+apagaMensagem : string "                           "
 Letra : var #0
-
-; posições dos blocos (centro)
-; tamanho = 8x6
-posiCima : var #211
-posiBaixo : var #851
-posiEsq : var #525
-posiDir : var #547
-
-; cores dos blocos
-corCima : var #512; verde
-corBaixo : var #3072 ; azul
-corEsq : var #2816 ; amarelo
-corDir : var #2304 ; vermelho
-
-; string desenhos
-bloco : var #125 ; caracter usado para printar o bloco
+pontos : string " Pontos: "
 
 ; da pra dividir em tres grupos
 ; um -> piscarSequencia e verificaExec
@@ -81,24 +70,40 @@ geraPaginaJogo:
 	push r1
 	push r2
 
-	load r0, bloco ; tipo de caracter usado para desenhar o bloco
-	load r1, corCima ; cor do bloco de cima
-	load r2, posiCima ; posicao do bloco de cima
+	; apaga mensagem da tela
+	loadn r0, #807			; Posicao na tela onde a mensagem sera' escrita
+	loadn r1, #apagaMensagem
+	loadn r2, #0			; Seleciona a COR da Mensagem
+	
+	call Imprimestr
+
+	loadn r0, #53
+	loadn r1, #pontos
+	loadn r2, #1536
+	call Imprimestr
+
+	loadn r0, #64
+	loadn r1, #1584
+	outchar r1, r0
+
+	loadn r0, #125 ; tipo de caracter usado para desenhar o bloco
+	loadn r1, #512 ; cor do bloco de cima
+	loadn r2, #216 ; posicao do bloco de cima
 	call desenhaBloco
 
-	load r0, bloco ; tipo de caracter usado para desenhar o bloco
-	load r1, corEsq ; cor do bloco de cima
-	load r2, posiEsq ; posicao do bloco de cima
+	loadn r0, #125 ; tipo de caracter usado para desenhar o bloco
+	loadn r1, #2816 ; cor do bloco de esq
+	loadn r2, #525 ; posicao do bloco de esq
 	call desenhaBloco
 
-	load r0, bloco ; tipo de caracter usado para desenhar o bloco
-	load r1, corDir ; cor do bloco de cima
-	load r2, posiDir ; posicao do bloco de cima
+	loadn r0, #125 ; tipo de caracter usado para desenhar o bloco
+	loadn r1, #2304 ; cor do bloco de dir
+	loadn r2, #547 ; posicao do bloco de dir
 	call desenhaBloco
 
-	load r0, bloco ; tipo de caracter usado para desenhar o bloco
-	load r1, corBaixo ; cor do bloco de cima
-	load r2, posiBaixo ; posicao do bloco de cima
+	loadn r0, #125 ; tipo de caracter usado para desenhar o bloco
+	loadn r1, #3072 ; cor do bloco de baixo
+	loadn r2, #856 ; posicao do bloco de baixo
 	call desenhaBloco
 
 	pop r2
