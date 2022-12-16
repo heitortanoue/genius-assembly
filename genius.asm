@@ -55,6 +55,7 @@ randSequence : var #35; tabela de nr. Randomicos
 jogadasAtual : var #0 ; indice da ultima jogada no vetor jogadas
 ultimaJogada : var #0 ; converte Letra para numero
 jogadas : var #32
+numJogadas: var #0
 
 ; da pra dividir em tres grupos
 ; um -> piscarSequencia e verificaExec
@@ -87,18 +88,28 @@ main:   ; gera pagina inicial
 
 	call geraPaginaJogo
 	
+	call Delay
+	
+	call limpaBlocos
+	
     ; gera a primeira jogada
-    call insereJogadaAleatoria
+    ;call insereJogadaAleatoria
 
     ; MODELO DE USO de acessaJogada
     ; acessa primeira jogada
-    loadn r0, #1
+    ;loadn r0, #1
     ; para acessar a ultima jogada, use o valor de jogadasAtual
     ; load r0, jogadasAtual
-    call acessaJogada
+    ;call acessaJogada
+    
+    ;call geraBlocoAleat
+    
+    ;call Delay
+    
+    ;call limpaBlocos
     ; r0 contem o valor da jogada
 
-    call digLetra
+    call loopJogo
 
 
 	halt
@@ -377,3 +388,287 @@ ImprimestrSai:
 	pop r1
 	pop r0
 	rts		; retorno da subrotina
+
+Delay:
+	push r0
+	push r1
+	
+	loadn r1, #800  ; a
+   	Delay_volta2:				;Quebrou o contador acima em duas partes (dois loops de decremento)
+	loadn r0, #3000	; b
+   	Delay_volta: 
+	dec r0					; (4*a + 6)b = 1000000  == 1 seg  em um clock de 1MHz
+	jnz Delay_volta	
+	dec r1
+	jnz Delay_volta2
+	
+	pop r1
+	pop r0
+	
+	rts
+	
+limpaBlocos:
+	push r1
+	push r2
+
+	loadn r1, #3840
+
+	loadn r2, #216 ; posicao do bloco de cima
+	call desenhaBloco
+
+	loadn r2, #525 ; posicao do bloco de esq
+	call desenhaBloco
+
+	loadn r2, #547 ; posicao do bloco de dir
+	call desenhaBloco
+	
+	loadn r2, #856 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+	
+blocoCima:
+	push r1
+	push r2
+	
+	loadn r1, #512 ; cor
+	loadn r2, #216 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+	
+blocoBaixo:
+	push r1
+	push r2
+	
+	loadn r1, #3072 ; cor
+	loadn r2, #856 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+
+blocoEsq:
+	push r1
+	push r2
+	
+	loadn r1, #2816 ; cor
+	loadn r2, #525 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+
+blocoDir:
+	push r1
+	push r2
+	
+	loadn r1, #2304 ; cor
+	loadn r2, #547 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+	
+geraBlocoAleat:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	
+    ; MODELO DE USO de acessaJogada
+    ; acessa primeira jogada
+    ; para acessar a ultima jogada, use o valor de jogadasAtual
+    ; load r0, jogadasAtual
+    ;call acessaJogada
+    ; r0 contem o valor da jogada
+	;load r0, jogadasAtual
+	
+	
+    loadn r0, #4
+    call geraAleatorioComMax
+    
+	loadn r1, #0
+	cmp r0, r1
+	ceq blocoCima
+	
+	loadn r2, #1
+	cmp r0, r2
+	ceq blocoDir
+	
+	loadn r3, #2
+	cmp r0, r3
+	ceq blocoEsq
+	
+	loadn r4, #3
+	cmp r0, r4
+	ceq blocoBaixo
+	
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	rts
+	
+LoopJogada:
+	push r0
+	push r1
+	push r2
+	push r3
+	
+	load r0, jogadasAtual
+	load r3, jogadasAtual ; contador
+	
+	geraLoop:
+		loadi r2, r0
+		call acessaJogada
+		call geraBlocoAleat
+		call Delay
+		call limpaBlocos
+		loadi r0, r2
+		dec r0
+		dec r3
+		jnz geraLoop
+	
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	
+	rts
+	
+entradasJogador:
+	push r0
+	push r1
+
+	load r0, jogadasAtual
+	loopEntrada:
+		call entrada
+		call limpaBlocos
+		call geraBlocoJogador
+		
+		dec r0
+		jnz loopEntrada
+		
+	pop r0
+	pop r1
+	
+	call Delay
+	
+	rts
+
+entrada:
+	push fr
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	
+	digita:
+		call digLetra
+		
+		load r0, Letra
+		loadn r1, #'w'
+		loadn r2, #'a'
+		loadn r3, #'s'
+		loadn r4, #'d'
+		
+		cmp r0, r1
+		jeq retorna
+		cmp r0, r2
+		jeq retorna
+		cmp r0, r3
+		jeq retorna
+		cmp r0, r4
+		jeq retorna
+		
+		jmp digita 
+
+	retorna:
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0	
+		pop fr
+		rts
+	
+geraBlocoJogador:
+	push fr
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	
+    ;loadn r0, #4
+    ;call geraAleatorioComMax
+	load r0, Letra
+    
+	loadn r1, #'w'
+	cmp r0, r1
+	ceq blocoCima
+	
+	loadn r2, #'d'
+	cmp r0, r2
+	ceq blocoDir
+	
+	loadn r3, #'a'
+	cmp r0, r3
+	ceq blocoEsq
+	
+	loadn r4, #'s'
+	cmp r0, r4
+	ceq blocoBaixo
+	
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop fr
+	rts
+	
+loopJogo:
+	push r0
+	push r1
+	push r2
+	
+	load r0, numJogadas
+	inc r0
+	store numJogadas, r0
+	
+	call insereJogadaAleatoria
+		
+	call LoopJogada
+		
+
+	call entradasJogador
+	call limpaBlocos
+	
+	call Delay
+	call Delay
+	call Delay
+
+	pop r2
+	pop r1
+	pop r0
+
+	jmp loopJogo
+	
+	rts
