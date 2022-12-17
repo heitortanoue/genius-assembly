@@ -7,6 +7,9 @@ mensagemInicio : string "[enter para iniciar o jogo]"
 apagaMensagem : string "                           "
 Letra : var #0
 pontos : string " Pontos: "
+scoreTotal: var #0
+valorJogada: var #0
+perdeu: var #0
 
 incRand: var #1;circular a tabela de nr. Randomicos
 randSequence : var #35; tabela de nr. Randomicos
@@ -68,8 +71,10 @@ main:   ; gera pagina inicial
 
     ; NAO REMOVER
     loadn r0, #0
+    loadn r3, #1584
     store jogadasAtual, r0
-    call insereJogadaAleatoria
+    store scoreTotal, r3
+    ;call insereJogadaAleatoria
     ; NAO REMOVER
 
 	call DesenharEstrelas;
@@ -89,18 +94,22 @@ main:   ; gera pagina inicial
 
 	call geraPaginaJogo
 	
+	call Delay
+	
+	call limpaBlocos
+	
     ; pode comentar isso aqui depois
-    call insereJogadaAleatoria
-    loadn r0, #1
-    call acessaJogada
-    mov r1, r0
-    loadn r0, #1
-    call acessaJogada
+    ;call insereJogadaAleatoria
+    ;loadn r0, #1
+    ;call acessaJogada
+    ;mov r1, r0
+    ;loadn r0, #1
+    ;call acessaJogada
 
-    ;call loopJogo
+    call loopJogo
 
-
-	halt
+    perdeuJogo:
+		halt
 
 digLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
 	push fr		; Protege o registrador de flags
@@ -497,8 +506,8 @@ geraBlocoAleat:
 	;load r0, jogadasAtual
 	
 	
-    loadn r0, #4
-    call geraAleatorioComMax
+    ;loadn r0, #4
+    ;call geraAleatorioComMax
     
 	loadn r1, #0
 	cmp r0, r1
@@ -529,7 +538,8 @@ LoopJogada:
 	push r2
 	push r3
 	
-	load r0, jogadasAtual
+	loadn r0, #1
+	;load r0, jogadasAtual ; indice da jogada
 	load r3, jogadasAtual ; contador
 	
 	geraLoop:
@@ -539,7 +549,7 @@ LoopJogada:
 		call Delay
 		call limpaBlocos
 		loadi r0, r2
-		dec r0
+		inc r0
 		dec r3
 		jnz geraLoop
 	
@@ -553,18 +563,33 @@ LoopJogada:
 entradasJogador:
 	push r0
 	push r1
-
-	load r0, jogadasAtual
+	push r3
+	push r4
+	push r5
+	push r6
+	loadn r5, #64
+	
+	inchar r3
+	load r1, jogadasAtual
+	loadn r0, #1
 	loopEntrada:
+		loadi r2, r0
 		call entrada
 		call limpaBlocos
 		call geraBlocoJogador
-		
-		dec r0
+		call defValorJogada
+		call testaJogada
+		loadi r0, r2
+		inc r0
+		dec r1
 		jnz loopEntrada
-		
+	
+	pop r6	
+	pop r5
+	pop r4
+	pop r3
+	pop r1	
 	pop r0
-	pop r1
 	
 	call Delay
 	
@@ -643,10 +668,93 @@ geraBlocoJogador:
 	pop fr
 	rts
 	
+defValorJogada:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+	
+	load r0, Letra
+	;loadn r0, #'d'
+	
+	loadn r1, #'w'
+	loadn r5, #0
+	cmp r0, r1
+	jeq retornaDef
+	
+	loadn r2, #'d'
+	loadn r5, #1
+	cmp r0, r2
+	jeq retornaDef
+
+	loadn r3, #'a'
+	loadn r5, #2
+	cmp r0, r3
+	jeq retornaDef
+
+	loadn r4, #'s'
+	loadn r5, #3
+	cmp r0, r4
+	jeq retornaDef
+
+	retornaDef:	
+		store valorJogada, r5
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		rts
+
+;r0 indice da jogada	
+testaJogada:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+	
+	loadn r5, #0 ; flag não perdeu
+	
+	load r1, valorJogada ; entrada do jogador
+	;loadn r1, #1
+	
+	call acessaJogada
+	;loadn r0, #3 ; jogada certa cima (teste)
+	
+	cmp r0, r1 ; compara com a lista de jogadas
+	jeq jogadaCerta
+	
+	;PARTE PRA QUANDO PERDE;
+	;loadn r3, #1
+	;store perdeu, r3 ;errou - perdeu o jogo
+	jmp perdeuJogo
+	
+	jogadaCerta:
+		store perdeu, r5
+		
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+		
+	rts
+	
 loopJogo:
 	push r0
 	push r1
 	push r2
+	push r3
+	push r4
+	
+	load r3, scoreTotal ; pontuação
+	loadn r4, #64
 	
 	load r0, numJogadas
 	inc r0
@@ -656,13 +764,18 @@ loopJogo:
 		
 	call LoopJogada
 		
-
 	call entradasJogador
+	
+	inc r3
+	outchar r3, r4
+	store scoreTotal, r3
+
 	call limpaBlocos
 	
 	call Delay
 	call Delay
 	call Delay
+
 
 	pop r2
 	pop r1
