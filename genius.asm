@@ -69,6 +69,7 @@ main:   ; gera pagina inicial
     ; NAO REMOVER
     loadn r0, #0
     store jogadasAtual, r0
+    call insereJogadaAleatoria
     ; NAO REMOVER
 
 	call DesenharEstrelas;
@@ -88,28 +89,15 @@ main:   ; gera pagina inicial
 
 	call geraPaginaJogo
 	
-	call Delay
-	
-	call limpaBlocos
-	
-    ; gera a primeira jogada
-    ;call insereJogadaAleatoria
+    ; pode comentar isso aqui depois
+    call insereJogadaAleatoria
+    loadn r0, #1
+    call acessaJogada
+    mov r1, r0
+    loadn r0, #1
+    call acessaJogada
 
-    ; MODELO DE USO de acessaJogada
-    ; acessa primeira jogada
-    ;loadn r0, #1
-    ; para acessar a ultima jogada, use o valor de jogadasAtual
-    ; load r0, jogadasAtual
-    ;call acessaJogada
-    
-    ;call geraBlocoAleat
-    
-    ;call Delay
-    
-    ;call limpaBlocos
-    ; r0 contem o valor da jogada
-
-    call loopJogo
+    ;call loopJogo
 
 
 	halt
@@ -255,26 +243,31 @@ geraAleatorio: ; gera num aleatorio de 0 a 3 (para o proximo valor do genius)
 ;(r0 - 1) é o valor maximo que pode ser gerado
 geraAleatorioComMax:
    push r1
+   push r2
 
    mov r1, r0
    call geraAleatorio
-   mod r0, r0, r1
+   mod r2, r0, r1
+   mov r0, r2
 
+    pop r2
    pop r1
    rts
 
 ; r0 = posicao a ser acessada
 acessaJogada:
     push r1
+    push r2
 
     mov r1, r0
     ; r0 esta livre
     ; r1 = posicao a ser acessada
     loadn r0, #jogadas
-    add r1, r1, r0
-    ; r1 agora aponta para a posicao da jogada
-    loadi r0, r1
+    add r2, r1, r0
+    ; r2 agora aponta para a posicao da jogada
+    loadi r0, r2
 
+    pop r2
     pop r1
     rts
 
@@ -282,23 +275,29 @@ acessaJogada:
 insereJogadaAleatoria:
     push r0
     push r1
+    push r2
+    push r3
 
-    ; incrementa o contador de jogadas
-    load r0, jogadasAtual
-    inc r0
-    store jogadasAtual, r0
+    ; r3 = contador de jogadas
+    load r3, jogadasAtual
+
     ; coloca em r1 a posicao a ser acessada
     loadn r1, #jogadas
-    add r1, r1, r0
+    add r2, r1, r3
 
     ; r0 = num max - 1
     loadn r0, #4
     call geraAleatorioComMax
 
     ; r0 = valor aleatorio
-    ; r1 = posicao a ser acessada
-    storei r1, r0
+    ; r2 = posicao a ser acessada
+    storei r2, r0
 
+    inc r3
+    store jogadasAtual, r3
+
+    pop r3
+    pop r2
     pop r1
     pop r0
     rts
