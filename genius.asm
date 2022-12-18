@@ -74,7 +74,7 @@ main:   ; gera pagina inicial
     loadn r3, #1584
     store jogadasAtual, r0
     store scoreTotal, r3
-    ;call insereJogadaAleatoria
+    call insereJogadaAleatoria
     ; NAO REMOVER
 
 	call DesenharEstrelas;
@@ -97,14 +97,6 @@ main:   ; gera pagina inicial
 	call Delay
 	
 	call limpaBlocos
-	
-    ; pode comentar isso aqui depois
-    ;call insereJogadaAleatoria
-    ;loadn r0, #1
-    ;call acessaJogada
-    ;mov r1, r0
-    ;loadn r0, #1
-    ;call acessaJogada
 
     call loopJogo
 
@@ -566,20 +558,18 @@ LoopJogada:
 	push r2
 	push r3
 	
-	loadn r0, #1
-	;load r0, jogadasAtual ; indice da jogada
+	loadn r2, #1
 	load r3, jogadasAtual ; contador
 	
 	geraLoop:
-		loadi r2, r0
+		mov r0, r2
 		call acessaJogada
 		call geraBlocoAleat
 		call Delay
 		call limpaBlocos
-		loadi r0, r2
-		inc r0
-		dec r3
-		jnz geraLoop
+		inc r2
+        cmp r2, r3
+		jne geraLoop
 	
 	pop r3
 	pop r2
@@ -599,18 +589,19 @@ entradasJogador:
 	
 	inchar r3
 	load r1, jogadasAtual
-	loadn r0, #1
+	loadn r2, #1
+
 	loopEntrada:
-		loadi r2, r0
 		call entrada
 		call limpaBlocos
 		call geraBlocoJogador
 		call defValorJogada
+        ; input r6
+        mov r6, r2
 		call testaJogada
-		loadi r0, r2
-		inc r0
-		dec r1
-		jnz loopEntrada
+		inc r2
+        cmp r2, r1
+		jne loopEntrada
 
     call MiniDelay
     call musicAcertou
@@ -753,7 +744,7 @@ testaJogada:
 	
 	load r1, valorJogada ; entrada do jogador
 	;loadn r1, #1
-	
+    mov r0, r6
 	call acessaJogada
 	;loadn r0, #3 ; jogada certa cima (teste)
 	
