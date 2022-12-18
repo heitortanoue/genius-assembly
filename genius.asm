@@ -109,6 +109,8 @@ main:   ; gera pagina inicial
     call loopJogo
 
     perdeuJogo:
+        call MiniDelay
+        call musicGameOver
 		halt
 
 digLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
@@ -401,7 +403,25 @@ Delay:
 	push r0
 	push r1
 	
-	loadn r1, #800  ; a
+	loadn r1, #2000  ; a
+   	Delay_volta2:				;Quebrou o contador acima em duas partes (dois loops de decremento)
+	loadn r0, #3000	; b
+   	Delay_volta: 
+	dec r0					; (4*a + 6)b = 1000000  == 1 seg  em um clock de 1MHz
+	jnz Delay_volta	
+	dec r1
+	jnz Delay_volta2
+	
+	pop r1
+	pop r0
+	
+	rts
+
+MiniDelay:
+	push r0
+	push r1
+	
+	loadn r1, #1000  ; a
    	Delay_volta2:				;Quebrou o contador acima em duas partes (dois loops de decremento)
 	loadn r0, #3000	; b
    	Delay_volta: 
@@ -445,6 +465,8 @@ blocoCima:
 	loadn r1, #512 ; cor
 	loadn r2, #216 ; posicao do bloco de baixo
 	call desenhaBloco
+    call MiniDelay
+    call soundUpPad
 	
 	pop r2
 	pop r1
@@ -458,6 +480,8 @@ blocoBaixo:
 	loadn r1, #3072 ; cor
 	loadn r2, #856 ; posicao do bloco de baixo
 	call desenhaBloco
+    call MiniDelay
+    call soundDownPad
 	
 	pop r2
 	pop r1
@@ -471,6 +495,8 @@ blocoEsq:
 	loadn r1, #2816 ; cor
 	loadn r2, #525 ; posicao do bloco de baixo
 	call desenhaBloco
+    call MiniDelay
+    call soundLeftPad
 	
 	pop r2
 	pop r1
@@ -484,6 +510,8 @@ blocoDir:
 	loadn r1, #2304 ; cor
 	loadn r2, #547 ; posicao do bloco de baixo
 	call desenhaBloco
+    call MiniDelay
+    call soundRightPad
 	
 	pop r2
 	pop r1
@@ -583,6 +611,9 @@ entradasJogador:
 		inc r0
 		dec r1
 		jnz loopEntrada
+
+    call MiniDelay
+    call musicAcertou
 	
 	pop r6	
 	pop r5
@@ -784,3 +815,143 @@ loopJogo:
 	jmp loopJogo
 	
 	rts
+
+tocaNota: 
+    ; r0 = frequencia
+    ; r1 = duracao
+    ; r2 = modo
+    sound r0, r1, r2
+
+    rts
+
+;toca musica de gameOver
+musicGameOver:
+    ; Melodia:
+    ; D4, C#4, C4, B4
+    ; 5873, 5544, 5233, 4939
+    push r0
+    push r1
+    push r2
+
+    ; r0 = frequencia
+    ; r1 = duracao
+    ; r2 = modo
+
+    loadn r0, #5873
+    loadn r1, #250
+    loadn r2, #2 ;onda triangular
+    call tocaNota
+
+    loadn r0, #5544
+    call tocaNota
+
+    loadn r0, #5233
+    call tocaNota
+
+    loadn r0, #4939
+    loadn r1, #1000
+    call tocaNota
+
+    pop r2
+    pop r1
+    pop r0
+
+    rts
+
+;musica quando acerta toda a sequencia
+musicAcertou:
+    ; Melodia:
+    ; D3, G3
+    ; 2936, 3919
+
+    push r2
+    push r1
+    push r0
+
+    ; r0 = frequencia
+    ; r1 = duracao
+    ; r2 = modo
+
+    loadn r0, #2936
+    loadn r1, #250
+    loadn r2, #2 ;onda triangular
+    call tocaNota
+
+    loadn r0, #3919
+    loadn r1, #250
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
+
+soundLeftPad:
+    ; Nota E3: 3296
+    push r0
+    push r1
+    push r2
+
+    loadn r0, #3296
+    loadn r1, #150
+    loadn r2, #0
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
+
+soundRightPad:
+    ; Nota G3: 3919
+    push r0
+    push r1
+    push r2
+
+    loadn r0, #3919
+    loadn r1, #150
+    loadn r2, #0
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
+
+soundUpPad:
+    ; Nota A4: 4400
+    push r0
+    push r1
+    push r2
+
+    loadn r0, #4400
+    loadn r1, #150
+    loadn r2, #0
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
+
+
+soundDownPad:
+    ; Nota C3: 2616
+    push r0
+    push r1
+    push r2
+
+    loadn r0, #2616
+    loadn r1, #150
+    loadn r2, #0
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
