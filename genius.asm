@@ -950,7 +950,6 @@ soundDownPad:
 
     rts
 
-
 telaPerda : var #1200
   ;Linha 0
   static telaPerda + #0, #3967
