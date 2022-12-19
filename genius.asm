@@ -7,11 +7,19 @@ mensagemInicio : string "[enter para iniciar o jogo]"
 apagaMensagem : string "                           "
 Letra : var #0
 pontos : string " Pontos: "
-scoreTotal: var #0
+scoreTotal: string "0"
 valorJogada: var #0
 perdeu: var #0
 
+randInicio: var #1
+passoRand: var #1
+
 incRand: var #1;circular a tabela de nr. Randomicos
+incSequence: var #3
+    static incSequence + #1 , #14
+    static incSequence + #2 , #12
+    static incSequence + #3 , #9
+
 randSequence : var #35; tabela de nr. Randomicos
    static randSequence + #0 , #56241    ; %4 = 1
    static randSequence + #1 , #53281    ; %4 = 2
@@ -104,21 +112,60 @@ main:   ; gera pagina inicial
         call geraTelaPerda
         call MiniDelay
         call musicGameOver
+
+        call esperaInicio
+        call limpaTelaPerda
+        jmp main
 		halt
+
+reiniciaVal:
+    loadn r2, #0
+    rts
+reiniciaVal2:
+    loadn r5, #0
+    rts
 
 digLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
 	push fr		; Protege o registrador de flags
 	push r0
 	push r1
+    push r2
+    push r3
+    push r4
+    push r5
+    push r6
 	loadn r1, #255	; Se nao digitar nada vem 255
 
+    loadn r2, #0
+    loadn r3, #35
+    loadn r5, #0
+    loadn r6, #2
    	digLetra_Loop:
+        inc r2
+        cmp r2, r3
+        ceq reiniciaVal
+        inc r5
+        cmp r5, r6
+        ceq reiniciaVal2
+
 		inchar r0			; Le o teclado, se nada for digitado = 255
 		cmp r0, r1			;compara r0 com 255
 		jeq digLetra_Loop	; Fica lendo ate' que digite uma tecla valida
 
+    loadn r4, #randSequence
+    add r4, r2, r4
+    store randInicio, r4
+
+    loadn r4, #incSequence
+    add r4, r4, r5
+    store incSequence, r4
 	store Letra, r0			; Salva a tecla na variavel global "Letra"			
 	
+    pop r6
+    pop r5
+    pop r4
+    pop r3
+    pop r2
 	pop r1
 	pop r0
 	pop fr
@@ -230,16 +277,16 @@ desenhaLinha:
 
 geraAleatorio: ; gera num aleatorio de 0 a 3 (para o proximo valor do genius)
    push r1
+   push r2
 
-   load r0, incRand
-   inc r0
+   load r0, randInicio
+   load r2, incSequence
+   add r0, r0, r2
    loadn r1, #35
    mod r0, r0, r1
-   store incRand, r0
-   loadn r1, #randSequence
-   add r1, r1, r0
-   loadi r0, r1
+   store randInicio, r0
 
+   pop r2
    pop r1
    rts
 
@@ -2232,6 +2279,28 @@ geraTelaPerda:
     jne printtelaPerdaScreenLoop
 
   pop R3
+  pop R2
+  pop R1
+  pop R0
+  rts
+
+limpaTelaPerda:
+  push R0
+  push R1
+  push R2
+
+  loadn R0, #0
+  loadn R1, #0
+  loadn R2, #1200
+
+  printlimpaTelaLoop:
+
+    outchar R0, R1
+    inc R1
+    cmp R1, R2
+
+    jne printlimpaTelaLoop
+
   pop R2
   pop R1
   pop R0
