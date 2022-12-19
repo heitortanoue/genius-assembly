@@ -16,43 +16,43 @@ passoRand: var #1
 
 incRand: var #1;circular a tabela de nr. Randomicos
 incSequence: var #3
-    static incSequence + #1 , #14
-    static incSequence + #2 , #12
-    static incSequence + #3 , #9
+    static incSequence + #1 , #1
+    static incSequence + #3 , #2
+    static incSequence + #7 , #3
 
 randSequence : var #35; tabela de nr. Randomicos
    static randSequence + #0 , #56241    ; %4 = 1
-   static randSequence + #1 , #53281    ; %4 = 2
-   static randSequence + #2 , #1409     ; %4 = 3
+   static randSequence + #1 , #53282    ; %4 = 2
+   static randSequence + #2 , #1411     ; %4 = 3
    static randSequence + #3 , #30428    ; %4 = 0
    static randSequence + #4 , #51627    ; %4 = 3
    static randSequence + #7 , #10476    ; %4 = 0
    static randSequence + #8 , #42149    ; %4 = 1
-   static randSequence + #9 , #15652    ; %4 = 2
+   static randSequence + #9 , #15652    ; %4 = 0
    static randSequence + #10, #40367    ; %4 = 3
    static randSequence + #11, #1221     ; %4 = 1
-   static randSequence + #12, #33317    ; %4 = 2
-   static randSequence + #13, #49878    ; %4 = 0
+   static randSequence + #12, #33318    ; %4 = 2
+   static randSequence + #13, #49878    ; %4 = 2
    static randSequence + #14, #57321    ; %4 = 1
-   static randSequence + #15, #13091    ; %4 = 2
-   static randSequence + #16, #12214    ; %4 = 3
+   static randSequence + #15, #13091    ; %4 = 3
+   static randSequence + #16, #12214    ; %4 = 2
    static randSequence + #17, #7925     ; %4 = 1
-   static randSequence + #18, #15409    ; %4 = 2
+   static randSequence + #18, #15409    ; %4 = 1
    static randSequence + #19, #51788    ; %4 = 0
    static randSequence + #20, #29654    ; %4 = 2
    static randSequence + #21, #23848    ; %4 = 0
    static randSequence + #22, #43871    ; %4 = 3
    static randSequence + #23, #56169    ; %4 = 1
-   static randSequence + #24, #33517    ; %4 = 3
+   static randSequence + #24, #33517    ; %4 = 1
    static randSequence + #25, #39218    ; %4 = 2
    static randSequence + #26, #39371    ; %4 = 3
    static randSequence + #27, #61204    ; %4 = 0
    static randSequence + #28, #47533    ; %4 = 1
    static randSequence + #29, #18006    ; %4 = 2
-   static randSequence + #30, #18996    ; %4 = 2
-   static randSequence + #31, #18456    ; %4 = 3
-   static randSequence + #32, #19456    ; %4 = 0
-   static randSequence + #33, #21456    ; %4 = 1
+   static randSequence + #30, #18996    ; %4 = 0
+   static randSequence + #31, #18458    ; %4 = 2
+   static randSequence + #32, #19459   ; %4 = 0
+   static randSequence + #33, #21459    ; %4 = 0
    static randSequence + #34, #0        ; %4 = 0
 ; %4: 0 = verde, 1 = vermelho, 2 = amarelo, 3 = azul
 ; cima: verde, direita: vermelho, esquerda: amarelo, baixo: azul
@@ -154,6 +154,7 @@ digLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra
 
     loadn r4, #randSequence
     add r4, r2, r4
+    mod r4, r4, r3
     store randInicio, r4
 
     loadn r4, #incSequence
