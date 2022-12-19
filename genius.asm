@@ -7,11 +7,19 @@ mensagemInicio : string "[enter para iniciar o jogo]"
 apagaMensagem : string "                           "
 Letra : var #0
 pontos : string " Pontos: "
-scoreTotal: var #0
+scoreTotal: string "0"
 valorJogada: var #0
 perdeu: var #0
 
+randInicio: var #1
+passoRand: var #1
+
 incRand: var #1;circular a tabela de nr. Randomicos
+incSequence: var #3
+    static incSequence + #1 , #14
+    static incSequence + #2 , #12
+    static incSequence + #3 , #9
+
 randSequence : var #35; tabela de nr. Randomicos
    static randSequence + #0 , #56241    ; %4 = 1
    static randSequence + #1 , #53281    ; %4 = 2
@@ -74,7 +82,7 @@ main:   ; gera pagina inicial
     loadn r3, #1584
     store jogadasAtual, r0
     store scoreTotal, r3
-    ;call insereJogadaAleatoria
+    call insereJogadaAleatoria
     ; NAO REMOVER
 
 	call DesenharEstrelas;
@@ -97,33 +105,67 @@ main:   ; gera pagina inicial
 	call Delay
 	
 	call limpaBlocos
-	
-    ; pode comentar isso aqui depois
-    ;call insereJogadaAleatoria
-    ;loadn r0, #1
-    ;call acessaJogada
-    ;mov r1, r0
-    ;loadn r0, #1
-    ;call acessaJogada
 
     call loopJogo
 
     perdeuJogo:
+        call geraTelaPerda
+        call MiniDelay
+        call musicGameOver
+
+        call esperaInicio
+        call limpaTelaPerda
+        jmp main
 		halt
+
+reiniciaVal:
+    loadn r2, #0
+    rts
+reiniciaVal2:
+    loadn r5, #0
+    rts
 
 digLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
 	push fr		; Protege o registrador de flags
 	push r0
 	push r1
+    push r2
+    push r3
+    push r4
+    push r5
+    push r6
 	loadn r1, #255	; Se nao digitar nada vem 255
 
+    loadn r2, #0
+    loadn r3, #35
+    loadn r5, #0
+    loadn r6, #2
    	digLetra_Loop:
+        inc r2
+        cmp r2, r3
+        ceq reiniciaVal
+        inc r5
+        cmp r5, r6
+        ceq reiniciaVal2
+
 		inchar r0			; Le o teclado, se nada for digitado = 255
 		cmp r0, r1			;compara r0 com 255
 		jeq digLetra_Loop	; Fica lendo ate' que digite uma tecla valida
 
+    loadn r4, #randSequence
+    add r4, r2, r4
+    store randInicio, r4
+
+    loadn r4, #incSequence
+    add r4, r4, r5
+    store incSequence, r4
 	store Letra, r0			; Salva a tecla na variavel global "Letra"			
 	
+    pop r6
+    pop r5
+    pop r4
+    pop r3
+    pop r2
 	pop r1
 	pop r0
 	pop fr
@@ -235,16 +277,16 @@ desenhaLinha:
 
 geraAleatorio: ; gera num aleatorio de 0 a 3 (para o proximo valor do genius)
    push r1
+   push r2
 
-   load r0, incRand
-   inc r0
+   load r0, randInicio
+   load r2, incSequence
+   add r0, r0, r2
    loadn r1, #35
    mod r0, r0, r1
-   store incRand, r0
-   loadn r1, #randSequence
-   add r1, r1, r0
-   loadi r0, r1
+   store randInicio, r0
 
+   pop r2
    pop r1
    rts
 
@@ -401,7 +443,25 @@ Delay:
 	push r0
 	push r1
 	
-	loadn r1, #800  ; a
+	loadn r1, #2000  ; a
+   	Delay_volta2:				;Quebrou o contador acima em duas partes (dois loops de decremento)
+	loadn r0, #3000	; b
+   	Delay_volta: 
+	dec r0					; (4*a + 6)b = 1000000  == 1 seg  em um clock de 1MHz
+	jnz Delay_volta	
+	dec r1
+	jnz Delay_volta2
+	
+	pop r1
+	pop r0
+	
+	rts
+
+MiniDelay:
+	push r0
+	push r1
+	
+	loadn r1, #1000  ; a
    	Delay_volta2:				;Quebrou o contador acima em duas partes (dois loops de decremento)
 	loadn r0, #3000	; b
    	Delay_volta: 
@@ -445,6 +505,8 @@ blocoCima:
 	loadn r1, #512 ; cor
 	loadn r2, #216 ; posicao do bloco de baixo
 	call desenhaBloco
+    call MiniDelay
+    call soundUpPad
 	
 	pop r2
 	pop r1
@@ -458,6 +520,8 @@ blocoBaixo:
 	loadn r1, #3072 ; cor
 	loadn r2, #856 ; posicao do bloco de baixo
 	call desenhaBloco
+    call MiniDelay
+    call soundDownPad
 	
 	pop r2
 	pop r1
@@ -471,6 +535,8 @@ blocoEsq:
 	loadn r1, #2816 ; cor
 	loadn r2, #525 ; posicao do bloco de baixo
 	call desenhaBloco
+    call MiniDelay
+    call soundLeftPad
 	
 	pop r2
 	pop r1
@@ -484,6 +550,8 @@ blocoDir:
 	loadn r1, #2304 ; cor
 	loadn r2, #547 ; posicao do bloco de baixo
 	call desenhaBloco
+    call MiniDelay
+    call soundRightPad
 	
 	pop r2
 	pop r1
@@ -538,20 +606,18 @@ LoopJogada:
 	push r2
 	push r3
 	
-	loadn r0, #1
-	;load r0, jogadasAtual ; indice da jogada
+	loadn r2, #1
 	load r3, jogadasAtual ; contador
 	
 	geraLoop:
-		loadi r2, r0
+		mov r0, r2
 		call acessaJogada
 		call geraBlocoAleat
 		call Delay
 		call limpaBlocos
-		loadi r0, r2
-		inc r0
-		dec r3
-		jnz geraLoop
+		inc r2
+        cmp r2, r3
+		jne geraLoop
 	
 	pop r3
 	pop r2
@@ -567,22 +633,26 @@ entradasJogador:
 	push r4
 	push r5
 	push r6
+
 	loadn r5, #64
-	
 	inchar r3
 	load r1, jogadasAtual
-	loadn r0, #1
+	loadn r2, #1
+
 	loopEntrada:
-		loadi r2, r0
 		call entrada
 		call limpaBlocos
 		call geraBlocoJogador
 		call defValorJogada
+        ; input r6
+        mov r6, r2
 		call testaJogada
-		loadi r0, r2
-		inc r0
-		dec r1
-		jnz loopEntrada
+		inc r2
+        cmp r2, r1
+		jne loopEntrada
+
+    call MiniDelay
+    call musicAcertou
 	
 	pop r6	
 	pop r5
@@ -722,7 +792,7 @@ testaJogada:
 	
 	load r1, valorJogada ; entrada do jogador
 	;loadn r1, #1
-	
+    mov r0, r6
 	call acessaJogada
 	;loadn r0, #3 ; jogada certa cima (teste)
 	
@@ -766,7 +836,9 @@ loopJogo:
 		
 	call entradasJogador
 	
+    
 	inc r3
+    loadn r4, #64
 	outchar r3, r4
 	store scoreTotal, r3
 
@@ -784,6 +856,146 @@ loopJogo:
 	jmp loopJogo
 	
 	rts
+
+tocaNota: 
+    ; r0 = frequencia
+    ; r1 = duracao
+    ; r2 = modo
+    sound r0, r1, r2
+
+    rts
+
+;toca musica de gameOver
+musicGameOver:
+    ; Melodia:
+    ; D4, C#4, C4, B4
+    ; 5873, 5544, 5233, 4939
+    push r0
+    push r1
+    push r2
+
+    ; r0 = frequencia
+    ; r1 = duracao
+    ; r2 = modo
+
+    loadn r0, #5873
+    loadn r1, #250
+    loadn r2, #2 ;onda triangular
+    call tocaNota
+
+    loadn r0, #5544
+    call tocaNota
+
+    loadn r0, #5233
+    call tocaNota
+
+    loadn r0, #4939
+    loadn r1, #1000
+    call tocaNota
+
+    pop r2
+    pop r1
+    pop r0
+
+    rts
+
+;musica quando acerta toda a sequencia
+musicAcertou:
+    ; Melodia:
+    ; D3, G3
+    ; 2936, 3919
+
+    push r2
+    push r1
+    push r0
+
+    ; r0 = frequencia
+    ; r1 = duracao
+    ; r2 = modo
+
+    loadn r0, #2936
+    loadn r1, #250
+    loadn r2, #2 ;onda triangular
+    call tocaNota
+
+    loadn r0, #3919
+    loadn r1, #250
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
+
+soundLeftPad:
+    ; Nota E3: 3296
+    push r0
+    push r1
+    push r2
+
+    loadn r0, #3296
+    loadn r1, #150
+    loadn r2, #0
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
+
+soundRightPad:
+    ; Nota G3: 3919
+    push r0
+    push r1
+    push r2
+
+    loadn r0, #3919
+    loadn r1, #150
+    loadn r2, #0
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
+
+soundUpPad:
+    ; Nota A4: 4400
+    push r0
+    push r1
+    push r2
+
+    loadn r0, #4400
+    loadn r1, #150
+    loadn r2, #0
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
+
+
+soundDownPad:
+    ; Nota C3: 2616
+    push r0
+    push r1
+    push r2
+
+    loadn r0, #2616
+    loadn r1, #150
+    loadn r2, #0
+    call tocaNota
+
+    pop r0
+    pop r1
+    pop r2
+
+    rts
 
 telaPerda : var #1200
   ;Linha 0
@@ -2067,6 +2279,28 @@ geraTelaPerda:
     jne printtelaPerdaScreenLoop
 
   pop R3
+  pop R2
+  pop R1
+  pop R0
+  rts
+
+limpaTelaPerda:
+  push R0
+  push R1
+  push R2
+
+  loadn R0, #0
+  loadn R1, #0
+  loadn R2, #1200
+
+  printlimpaTelaLoop:
+
+    outchar R0, R1
+    inc R1
+    cmp R1, R2
+
+    jne printlimpaTelaLoop
+
   pop R2
   pop R1
   pop R0
